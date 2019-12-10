@@ -7,13 +7,6 @@ services:
       context: .
       dockerfile: BookService/Dockerfile
 
-  authorservice:
-    image: ${DOCKER_REGISTRY-}authorservice
-    build:
-      context: .
-      dockerfile: AuthorService/Dockerfile
-
-
   loanservice:
     image: ${DOCKER_REGISTRY-}loanservice
     build:
