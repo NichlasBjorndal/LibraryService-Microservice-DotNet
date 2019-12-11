@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BookService.Models
+namespace OrderService.Models
 {
-    public class Book
+    public class OrderedBook
     {
         public int Id { get; set; }
         public string ISBN { get; set; }
         public string Title { get; set; }
         public int AuthorId { get; set; }
-        public Author Author { get; set; }
-        public int? OrderId { get; set; }
+        public string AuthorFirstName { get; set; }
+        public string AuthorLastName { get; set; }
     }
 }
