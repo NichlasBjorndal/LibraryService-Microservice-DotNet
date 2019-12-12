@@ -2,7 +2,7 @@
 
 namespace BookService.Migrations
 {
-    public partial class orderid : Migration
+    public partial class bookdbrefactor : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

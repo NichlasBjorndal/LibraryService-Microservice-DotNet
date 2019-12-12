@@ -1,25 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using BookService.Models;
+using Microsoft.Azure.ServiceBus;
 
 namespace BookService
 {
     public class Startup
     {
+        const string ServiceBusConnectionString = "Endpoint=sb://libraryservice.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=N+/IWwFIYrcbsO1/GJfKFUsefoiIwgRDtZqaHT+0zpo=";
+        const string QueueName = "order-queue";
+        static IQueueClient queueClient;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+
+            //guide from https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dotnet-get-started-with-queues
+            queueClient = new QueueClient(ServiceBusConnectionString, QueueName);
+
+            RegisterOnMessageHandlerAndReceiveMessages();
         }
 
         public IConfiguration Configuration { get; }
@@ -34,8 +41,10 @@ namespace BookService
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
         {
+            applicationLifetime.ApplicationStopping.Register(OnShutdown);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -51,6 +60,45 @@ namespace BookService
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void OnShutdown()
+        { 
+            queueClient.CloseAsync();
+        }
+
+        static void RegisterOnMessageHandlerAndReceiveMessages()
+        {
+            // Configure the message handler options in terms of exception handling, number of concurrent messages to deliver, etc.
+            var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
+            {
+                MaxConcurrentCalls = 5,
+
+                AutoComplete = false
+            };
+
+            // Register the function that processes messages.
+            queueClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
+        }
+
+        static async Task ProcessMessagesAsync(Message message, CancellationToken token)
+        {
+            Console.WriteLine($"Body:{Encoding.UTF8.GetString(message.Body)}");
+
+            await queueClient.CompleteAsync(message.SystemProperties.LockToken);
+
+        }
+
+        // Use this handler to examine the exceptions received on the message pump.
+        static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
+        {
+            Console.WriteLine($"Message handler encountered an exception {exceptionReceivedEventArgs.Exception}.");
+            var context = exceptionReceivedEventArgs.ExceptionReceivedContext;
+            Console.WriteLine("Exception context for troubleshooting:");
+            Console.WriteLine($"- Endpoint: {context.Endpoint}");
+            Console.WriteLine($"- Entity Path: {context.EntityPath}");
+            Console.WriteLine($"- Executing Action: {context.Action}");
+            return Task.CompletedTask;
         }
     }
 }

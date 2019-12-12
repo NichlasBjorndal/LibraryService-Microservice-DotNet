@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Models;
+
 
 namespace OrderService.Controllers
 {
@@ -14,6 +17,10 @@ namespace OrderService.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly OrderServiceContext _context;
+
+        const string ServiceBusConnectionString = "Endpoint=sb://libraryservice.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=N+/IWwFIYrcbsO1/GJfKFUsefoiIwgRDtZqaHT+0zpo=";
+        const string QueueName = "order-queue";
+        static IQueueClient queueClient;
 
         public OrdersController(OrderServiceContext context)
         {
@@ -24,7 +31,19 @@ namespace OrderService.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrder()
         {
+            await SendMsg();
             return await _context.Order.ToListAsync();
+        }
+
+        private async Task SendMsg()
+        {
+            queueClient = new QueueClient(ServiceBusConnectionString, QueueName);
+
+            string messageBody = "hello world";
+           
+            var message = new Message(Encoding.UTF8.GetBytes(messageBody));
+
+            await queueClient.SendAsync(message);
         }
 
         // GET: api/Orders/5

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookService.Migrations
 {
     [DbContext(typeof(BookServiceContext))]
-    [Migration("20191211165334_order-id")]
-    partial class orderid
+    [Migration("20191212161141_book-db-refactor")]
+    partial class bookdbrefactor
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

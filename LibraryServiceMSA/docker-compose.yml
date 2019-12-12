@@ -13,3 +13,10 @@ services:
       context: .
       dockerfile: LoanService/Dockerfile
 
+
+  orderservice:
+    image: ${DOCKER_REGISTRY-}orderservice
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+
