@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace OrderService.Models
+namespace BookService.Models
 {
     public class Order
     {
@@ -11,5 +8,6 @@ namespace OrderService.Models
         public DateTime OrdTime { get; set; }
         public bool IsCompleted { get; set; }
         public int BookId { get; set; }
+        public OrderedBook OrderedBook { get; set; }
     }
 }

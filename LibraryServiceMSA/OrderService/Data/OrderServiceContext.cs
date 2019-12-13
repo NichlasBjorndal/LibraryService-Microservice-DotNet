@@ -13,6 +13,31 @@ namespace OrderService.Models
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            var order = new Order
+            {
+                Id = 2,
+                OrdTime = default,
+                IsCompleted = false,
+                BookId = 7,
+               
+            };
+
+            var order2 = new Order
+            {
+                Id = 3,
+                OrdTime = default,
+                IsCompleted = false,
+                BookId = 8,
+            };
+
+
+            modelBuilder.Entity<Order>().HasData(
+                order, order2
+            );
+        }
+
         public DbSet<OrderService.Models.Order> Order { get; set; }
     }
 }

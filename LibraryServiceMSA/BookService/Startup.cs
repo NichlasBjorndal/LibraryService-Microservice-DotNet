@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using BookService.Models;
 using Microsoft.Azure.ServiceBus;
+using Newtonsoft.Json;
 
 namespace BookService
 {
@@ -63,7 +64,7 @@ namespace BookService
         }
 
         private void OnShutdown()
-        { 
+        {
             queueClient.CloseAsync();
         }
 
@@ -83,7 +84,41 @@ namespace BookService
 
         static async Task ProcessMessagesAsync(Message message, CancellationToken token)
         {
-            Console.WriteLine($"Body:{Encoding.UTF8.GetString(message.Body)}");
+            //Console.WriteLine($"Body:{Encoding.UTF8.GetString(message.Body)}");
+
+            var jsonString = Encoding.UTF8.GetString(message.Body);
+            
+            var order = JsonConvert.DeserializeObject<Order>(jsonString);
+
+            await using (var context = new BookServiceContext(null))
+            {
+                var book = await context.Book
+                    .Include(b => b.Author)
+                    .FirstAsync(b => b.OrderId == order.Id, cancellationToken: token);
+
+                //Meaning the order havnt been fulfilled yet
+                if (book == null)
+                {
+                    book = new Book
+                    {
+                        Id = order.BookId,
+                        ISBN = order.OrderedBook.ISBN,
+                        Title = order.OrderedBook.Title,
+                        AuthorId = order.OrderedBook.AuthorId,
+                        Author = new Author
+                        {
+                            Id = order.OrderedBook.AuthorId,
+                            FirstName = order.OrderedBook.AuthorFirstName,
+                            LastName = order.OrderedBook.AuthorLastName
+                        },
+                        OrderId = order.Id
+                    };
+                    
+
+                    context.Book.Add(book);
+                    await context.SaveChangesAsync(token);
+                }
+            }
 
             await queueClient.CompleteAsync(message.SystemProperties.LockToken);
 

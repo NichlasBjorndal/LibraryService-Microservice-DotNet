@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OrderService.Models;
 
 
@@ -31,15 +32,15 @@ namespace OrderService.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrder()
         {
-            await SendMsg();
-            return await _context.Order.ToListAsync();
+            return await _context.Order
+                .ToListAsync();
         }
 
-        private async Task SendMsg()
+        private async Task SendBookOrderMsg(Order order)
         {
             queueClient = new QueueClient(ServiceBusConnectionString, QueueName);
 
-            string messageBody = "hello world";
+            string messageBody = JsonConvert.SerializeObject(order);
            
             var message = new Message(Encoding.UTF8.GetBytes(messageBody));
 
@@ -50,7 +51,8 @@ namespace OrderService.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
-            var order = await _context.Order.FindAsync(id);
+            var order = await _context.Order
+                .FirstAsync(o => o.Id == id);
 
             if (order == null)
             {
@@ -72,6 +74,11 @@ namespace OrderService.Controllers
             }
 
             _context.Entry(order).State = EntityState.Modified;
+
+            if (order.IsCompleted)
+            {
+                await SendBookOrderMsg(order);
+            }
 
             try
             {
@@ -99,6 +106,12 @@ namespace OrderService.Controllers
         public async Task<ActionResult<Order>> PostOrder(Order order)
         {
             _context.Order.Add(order);
+
+            if (order.IsCompleted)
+            {
+                await SendBookOrderMsg(order);
+            }
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOrder", new { id = order.Id }, order);
