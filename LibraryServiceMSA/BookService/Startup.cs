@@ -20,6 +20,8 @@ namespace BookService
         const string ServiceBusConnectionString = "Endpoint=sb://libraryservice.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=N+/IWwFIYrcbsO1/GJfKFUsefoiIwgRDtZqaHT+0zpo=";
         const string QueueName = "order-queue";
         static IQueueClient queueClient;
+
+        static string _connString;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -38,8 +40,10 @@ namespace BookService
         {
             services.AddControllers();
 
+            _connString = Configuration.GetConnectionString("BookServiceContext");
+
             services.AddDbContext<BookServiceContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("BookServiceContext")));
+                    options.UseSqlServer(_connString));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,14 +95,18 @@ namespace BookService
 
             var order = JsonConvert.DeserializeObject<Order>(jsonString);
 
-            await using (var context = new BookServiceContext(null))
+
+            var optionsBuilder = new DbContextOptionsBuilder<BookServiceContext>();
+            optionsBuilder.UseSqlServer(_connString);
+
+            await using (var context = new BookServiceContext(optionsBuilder.Options))
             {
-                var completedOrder = await context.CompletedOrder.FirstAsync(co => co.OrderId == order.Id, token);
+                var completedOrder = await context.CompletedOrder.FirstOrDefaultAsync(co => co.OrderId == order.Id, token);
 
                 //Meaning the order havnt been fulfilled yet
                 if (completedOrder == null)
                 {
-                    var orderedBook = await context.Book.FirstAsync(b => b.Id == order.BookId, token);
+                    var orderedBook = await context.Book.FirstOrDefaultAsync(b => b.Id == order.BookId, token);
 
                     var physicalBook = new PhysicalBook
                     {
@@ -107,12 +115,17 @@ namespace BookService
                     };
 
                     context.PhysicalBook.Add(physicalBook);
+
+                    var completedOrder1 = new CompletedOrder
+                    {
+                        OrderId = order.Id
+                    };
+                    context.CompletedOrder.Add(completedOrder1);
                     await context.SaveChangesAsync(token);
                 }
             }
 
             await queueClient.CompleteAsync(message.SystemProperties.LockToken);
-
         }
 
         // Use this handler to examine the exceptions received on the message pump.
