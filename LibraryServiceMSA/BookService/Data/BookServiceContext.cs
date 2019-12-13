@@ -81,5 +81,13 @@ namespace BookService.Models
 
 
         public DbSet<BookService.Models.Author> Author { get; set; }
+
+
+
+        public DbSet<BookService.Models.PhysicalBook> PhysicalBook { get; set; }
+
+
+
+        public DbSet<BookService.Models.CompletedOrder> CompletedOrder { get; set; }
     }
 }

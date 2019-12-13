@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using BookService.Models;
+using BookService.Models.DTO;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 
@@ -87,35 +88,25 @@ namespace BookService
             //Console.WriteLine($"Body:{Encoding.UTF8.GetString(message.Body)}");
 
             var jsonString = Encoding.UTF8.GetString(message.Body);
-            
+
             var order = JsonConvert.DeserializeObject<Order>(jsonString);
 
             await using (var context = new BookServiceContext(null))
             {
-                var book = await context.Book
-                    .Include(b => b.Author)
-                    .FirstAsync(b => b.OrderId == order.Id, cancellationToken: token);
+                var completedOrder = await context.CompletedOrder.FirstAsync(co => co.OrderId == order.Id, token);
 
                 //Meaning the order havnt been fulfilled yet
-                if (book == null)
+                if (completedOrder == null)
                 {
-                    book = new Book
-                    {
-                        Id = order.BookId,
-                        ISBN = order.OrderedBook.ISBN,
-                        Title = order.OrderedBook.Title,
-                        AuthorId = order.OrderedBook.AuthorId,
-                        Author = new Author
-                        {
-                            Id = order.OrderedBook.AuthorId,
-                            FirstName = order.OrderedBook.AuthorFirstName,
-                            LastName = order.OrderedBook.AuthorLastName
-                        },
-                        OrderId = order.Id
-                    };
-                    
+                    var orderedBook = await context.Book.FirstAsync(b => b.Id == order.BookId, token);
 
-                    context.Book.Add(book);
+                    var physicalBook = new PhysicalBook
+                    {
+                        Book = orderedBook,
+                        BookId = order.BookId
+                    };
+
+                    context.PhysicalBook.Add(physicalBook);
                     await context.SaveChangesAsync(token);
                 }
             }

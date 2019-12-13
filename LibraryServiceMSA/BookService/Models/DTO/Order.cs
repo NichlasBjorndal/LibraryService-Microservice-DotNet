@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BookService.Models
+namespace BookService.Models.DTO
 {
     public class Order
     {
@@ -8,6 +8,5 @@ namespace BookService.Models
         public DateTime OrdTime { get; set; }
         public bool IsCompleted { get; set; }
         public int BookId { get; set; }
-        public OrderedBook OrderedBook { get; set; }
     }
 }
