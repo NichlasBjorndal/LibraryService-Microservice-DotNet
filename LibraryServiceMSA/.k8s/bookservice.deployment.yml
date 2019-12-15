@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookservice
+  labels: 
+    app: bookservice
+spec:
+  selector:
+    matchLabels:
+      run: bookservice
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: bookservice
+    spec:
+      containers:
+      - name: bookservice
+        image: nichlasbjorndal/bookservice:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        - containerPort: 443

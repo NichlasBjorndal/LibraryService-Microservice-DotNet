@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using BookService.Models;
 using BookService.Models.DTO;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 

@@ -11,7 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoanService", "LoanService\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService", "OrderService\OrderService.csproj", "{33CD973D-5810-4122-90AC-89A93A9625EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{9548D3D7-58BF-4580-A83E-29CCF56D5B71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "UserService\UserService.csproj", "{9548D3D7-58BF-4580-A83E-29CCF56D5B71}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2C538D7D-53F9-483D-9481-C33F9733D1AA}"
+	ProjectSection(SolutionItems) = preProject
+		.k8s\bookservice.deployment.yml = .k8s\bookservice.deployment.yml
+		.k8s\bookservice.yml = .k8s\bookservice.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -24,6 +24,7 @@ namespace BookService.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetBook()
         {
+            Response.Headers.Add("machine-name", Environment.MachineName);
             return await _context.Book
                 .Include(book => book.Author)
                 .ToListAsync();
