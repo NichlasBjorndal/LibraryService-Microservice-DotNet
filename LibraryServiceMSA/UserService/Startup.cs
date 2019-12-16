@@ -38,6 +38,8 @@ namespace UserService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            AddMachineNameToResponseHeader(app);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -56,6 +58,19 @@ namespace UserService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+        }
+
+        private static void AddMachineNameToResponseHeader(IApplicationBuilder app)
+        {
+            app.Use(async (context, next) =>
+            {
+                context.Response.OnStarting(() =>
+                {
+                    context.Response.Headers.Add("machine-name", Environment.MachineName);
+                    return Task.FromResult(0);
+                });
+                await next();
             });
         }
     }

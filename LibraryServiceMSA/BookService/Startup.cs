@@ -50,6 +50,9 @@ namespace BookService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
         {
+            //Allows to see which machine/docker container this instance is running on
+            AddMachineNameToResponseHeader(app);
+
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
 
             if (env.IsDevelopment())
@@ -66,6 +69,19 @@ namespace BookService
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+        }
+
+        private static void AddMachineNameToResponseHeader(IApplicationBuilder app)
+        {
+            app.Use(async (context, next) =>
+            {
+                context.Response.OnStarting(() =>
+                {
+                    context.Response.Headers.Add("machine-name", Environment.MachineName);
+                    return Task.FromResult(0);
+                });
+                await next();
             });
         }
 
