@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice
+  labels: 
+    app: orderservice
+spec:
+  selector:
+    matchLabels:
+      run: orderservice
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: orderservice
+    spec:
+      containers:
+      - name: orderservice
+        image: nichlasbjorndal/orderservice:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        - containerPort: 443

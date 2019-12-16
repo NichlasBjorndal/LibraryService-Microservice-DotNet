@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loanservice
+  labels: 
+    app: loanservice
+spec:
+  selector:
+    matchLabels:
+      run: loanservice
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: loanservice
+    spec:
+      containers:
+      - name: loanservice
+        image: nichlasbjorndal/loanservice:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        - containerPort: 443

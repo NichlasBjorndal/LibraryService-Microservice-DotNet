@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice
+  labels: 
+    app: userservice
+spec:
+  selector:
+    matchLabels:
+      run: userservice
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: userservice
+    spec:
+      containers:
+      - name: userservice
+        image: nichlasbjorndal/userservice:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        - containerPort: 443
