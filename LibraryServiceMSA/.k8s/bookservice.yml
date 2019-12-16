@@ -5,9 +5,9 @@ metadata:
   labels:
     run: bookservice
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
-  - name: "80"
+  - name: http
     port: 80
     protocol: TCP
     targetPort: 80

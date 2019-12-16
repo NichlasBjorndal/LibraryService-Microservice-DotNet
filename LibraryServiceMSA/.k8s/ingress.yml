@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: simple-fanout-example
+  annotations:
+    # https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /bookservice(/|$)(.*)
+        backend:
+          serviceName: bookservice
+          servicePort: 80
+      - path: /loanservice(/|$)(.*)
+        backend:
+          serviceName: loanservice
+          servicePort: 80
+      - path: /userservice(/|$)(.*)
+        backend:
+          serviceName: userservice
+          servicePort: 80
+      - path: /orderservice(/|$)(.*)
+        backend:
+          serviceName: orderservice
+          servicePort: 80

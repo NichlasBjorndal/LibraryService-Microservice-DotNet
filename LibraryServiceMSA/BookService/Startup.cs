@@ -78,6 +78,7 @@ namespace BookService
             {
                 context.Response.OnStarting(() =>
                 {
+                    context.Response.Headers.Add("path", context.Request.Path.Value);
                     context.Response.Headers.Add("machine-name", Environment.MachineName);
                     return Task.FromResult(0);
                 });
