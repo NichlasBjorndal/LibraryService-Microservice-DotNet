@@ -18,7 +18,7 @@ namespace OrderService.Models
             var order = new Order
             {
                 Id = 2,
-                OrdTime = default,
+                OrderTime = default,
                 IsCompleted = false,
                 BookId = 7,
                
@@ -27,7 +27,7 @@ namespace OrderService.Models
             var order2 = new Order
             {
                 Id = 3,
-                OrdTime = default,
+                OrderTime = default,
                 IsCompleted = false,
                 BookId = 8,
             };

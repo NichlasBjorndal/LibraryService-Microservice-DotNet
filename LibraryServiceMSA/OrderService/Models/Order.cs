@@ -10,7 +10,7 @@ namespace OrderService.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public DateTime OrdTime { get; set; }
+        public DateTime OrderTime { get; set; }
         public bool IsCompleted { get; set; }
         public int BookId { get; set; }
     }
