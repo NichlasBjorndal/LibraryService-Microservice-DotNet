@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using UserService.Models;
 
 namespace UserService.Controllers
@@ -81,7 +82,6 @@ namespace UserService.Controllers
         {
             _context.User.Add(user);
             await _context.SaveChangesAsync();
-
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 

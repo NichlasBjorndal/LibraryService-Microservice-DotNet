@@ -32,7 +32,9 @@ namespace UserService
             services.AddOpenApiDocument();
 
             services.AddDbContext<UserServiceContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("UserServiceContext")));
+                    options.UseSqlServer(Configuration.GetConnectionString("UserServiceContext"),
+                        sqlserverOption => sqlserverOption.CommandTimeout(30)
+                        ));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,10 +42,12 @@ namespace UserService
         {
             AddMachineNameToResponseHeader(app);
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+
+            app.UseDeveloperExceptionPage();
 
             //app.UseHttpsRedirection();
 
